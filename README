@@ -1,17 +1,59 @@
-
 ykfde - yubikey-based full disk encryption
+
+This code has been contributed as a different way to do Challenge Response, 
+rather than a fixed challenge given to the yubikey, the Challenge is requested
+from the user at boot, then hashed. The response is given as input to LUKS.
+
+This way your challenge isn't sitting in your unecrypted /boot
+
+This code is based on Ubuntu 12.10 and has not been tested with other distros.
 
 Quick start:
 
-install the package
-uuidgen > /boot/yubikey-challenge
-ykchalresp $(cat /boot/yubikey-challenge)
-cryptsetup luksAddKey /dev/sda2 /boot/yubikey-challenge
+Note: This code is based on the Challenge/Response being configured on the second slot of your YubiKey.
 
-On bootup, you will be asked to insert a yubikey (2.2 or newer) which
-will then provide the response.  If you do not want to use a yubikey,
-press enter and then enter a normal passphrase during bootup.
+First Install the perso tool:
+apt-get install yubikey-personalization
+
+Now get your crypto key for LUKS temporarily store this somewhere safe from comprimise:
+ykchalresp -2 "enter your passphrase here" > yk.key
+
+Add your keyfile to cryptsetup:
+  First figure out which device you are working with:
+  cat /etc/crypttab
+
+Now add your keyfile (you can add a failover passphrase here, I make mine extrememly long and back it up)
+cryptsetup luksAddKey /dev/sdXX yk.key
+
+You can now remove that key file!
+rm yk.key
+
+Now we need to tell crypttab where to get your keyfile, your crypttab should be modified as follows:
+sda_crypt /dev/sdXX yk.key luks,keyscript=/usr/local/sbin/ykcrypto.sh
+
+Don't forget to put ykcrypt.sh in that location and make it executable:
+mv ykcrypto.sh /usr/local/sbin/ykcrypto.sh
+chmod a+x /usr/local/sbin/ykcrypto.sh
+
+Next we have to modify the initramfs to add the perso tool. This could potentially lock out out of your machine,
+so possibly make a backup of your initramfs in your /boot and have it available as a backup, you can also add it
+as a backup to your grub config, I may add a help doc on that later.
+
+Put cryptoyk into /etc/initramfs-tools/hooks/
+Then make it executable
+mv cryptoyk /etc/initramfs-tools/hooks/cryptoyk
+chmod a+x /etc/initramfs-tools/hooks/cryptoyk
+
+Now update your initramfs
+update-initramfs -u all
+
+Reboot! 
+
+On bootup, you will be asked for your passphrase. Note, any phrase will be given to the YK 
+and get a YK success, only the correct passphrase will unlock the disk.
+An empty input will skip to the LUKS direct passphrase entry.
+
+
 
 Limitations/bugs:
-- uses the default ykchalresp settings, meaning no support for slot 2
-- does not update the challenge after each boot.
+Initial version, still testing... 
