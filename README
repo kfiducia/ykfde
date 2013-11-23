@@ -1,10 +1,12 @@
 ykfde - yubikey-based full disk encryption
 
+*** Ubuntu 13 problem after upgrade... working on a fix...***
+
 This code has been contributed as a different way to do Challenge Response, 
 rather than a fixed challenge given to the yubikey, the Challenge is requested
 from the user at boot, then hashed. The response is given as input to LUKS.
 
-This way your challenge isn't sitting in your unecrypted /boot
+This way your challenge isn't sitting in your unencrypted /boot
 
 This code is based on Ubuntu 12.10 and has not been tested with other distros.
 
@@ -15,7 +17,7 @@ Note: This code is based on the Challenge/Response being configured on the secon
 First Install the perso tool:
 apt-get install yubikey-personalization
 
-Now get your crypto key for LUKS temporarily store this somewhere safe from comprimise:
+Now get your crypto key for LUKS temporarily store this somewhere safe from compromise:
 ykchalresp -2 "enter your passphrase here" > yk.key
 
 Add your keyfile to cryptsetup:
@@ -56,4 +58,4 @@ An empty input will skip to the LUKS direct passphrase entry.
 
 
 Limitations/bugs:
-Initial version, still testing... 
+Initial version, still testing...
