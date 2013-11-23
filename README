@@ -1,6 +1,8 @@
 ykfde - yubikey-based full disk encryption
 
-*** Ubuntu 13 problem after upgrade... working on a fix...***
+*** If you dist-upgrade Ubuntu - rerun the initramfs update command ***
+*** but note the command has changed to: ***
+*** update-initramfs -u -k all ***
 
 This code has been contributed as a different way to do Challenge Response, 
 rather than a fixed challenge given to the yubikey, the Challenge is requested
